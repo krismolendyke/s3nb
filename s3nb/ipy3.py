@@ -201,16 +201,18 @@ class S3ContentsManager(ContentsManager):
             return model
 
     def dir_exists(self, path):
+        """Is ``path`` a directory?
+
+        :param str path: A path to test
+        :rtype: :py:class:`bool`
+        :returns: ``True`` if ``path`` is a directory.
+
+        """
         self.log.debug('dir_exists: %s', locals())
-        key = self._path_to_s3_key(path)
-        if path == '':
+        if not path:
             return True
-        else:
-            try:
-                next(iter(self.bucket.list(key, self.s3_key_delimiter)))
-                return True
-            except StopIteration:
-                return False
+        for key in self.bucket.list(self._path_to_s3_key(path), self.s3_key_delimiter):
+            return False if self.bucket.get_key(key.name) else True
 
     def is_hidden(self, path):
         self.log.debug('is_hidden %s', locals())
